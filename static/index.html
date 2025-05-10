@@ -503,6 +503,12 @@
                     apiStatus.classList.remove('disconnected');
                     apiStatus.classList.add('connected');
                     playSound('success');
+                    
+                    // Ensure form is interactive
+                    document.querySelectorAll('input, textarea, button').forEach(el => {
+                        el.disabled = false;
+                    });
+                    
                     return true;
                 } else {
                     throw new Error('API not healthy');
@@ -512,6 +518,12 @@
                 apiStatus.classList.remove('connected');
                 apiStatus.classList.add('disconnected');
                 playSound('error');
+                
+                // Even if API is not connected, ensure form is interactive
+                document.querySelectorAll('input, textarea, button').forEach(el => {
+                    el.disabled = false;
+                });
+                
                 return false;
             }
         }
@@ -613,6 +625,12 @@
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i class="bi bi-arrow-repeat rotate-slow me-2"></i> Processing...';
                 
+                // Check if API is connected first
+                const isConnected = await checkApiConnection();
+                if (!isConnected) {
+                    throw new Error('API not connected');
+                }
+                
                 const response = await fetch(`${API_BASE_URL}/items`, {
                     method: 'POST',
                     headers: {
@@ -630,10 +648,20 @@
                 playSound('success');
                 resetForm();
                 fetchItems();
+                
+                // Focus back on the name field for quick entry of another item
+                setTimeout(() => {
+                    document.getElementById('name').focus();
+                }, 300);
+                
                 return newItem;
             } catch (error) {
                 console.error('Error creating item:', error);
-                showAlert('<i class="bi bi-exclamation-triangle-fill me-2"></i> Failed to add item. Please try again.', 'danger');
+                if (error.message === 'API not connected') {
+                    showAlert('<i class="bi bi-exclamation-triangle-fill me-2"></i> Cannot add item: Database offline. Please activate the Flask server.', 'danger');
+                } else {
+                    showAlert('<i class="bi bi-exclamation-triangle-fill me-2"></i> Failed to add item. Please try again.', 'danger');
+                }
                 playSound('error');
             } finally {
                 submitBtn.disabled = false;
@@ -824,6 +852,12 @@
                 document.body.style.opacity = '1';
             }, 200);
             
+            // Focus on the name field to make it immediately interactive
+            setTimeout(() => {
+                document.getElementById('name').focus();
+            }, 500);
+            
+            // Try to connect to API but don't block UI interaction
             const isConnected = await checkApiConnection();
             if (isConnected) {
                 fetchItems();
@@ -837,6 +871,11 @@
                         </button>
                     </div>
                 `;
+                
+                // Even if API is not connected, ensure form is interactive
+                document.querySelectorAll('input, textarea, button').forEach(el => {
+                    el.disabled = false;
+                });
             }
         });
 
