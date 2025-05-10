@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Inventory Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #6e3bff;
+            --secondary-color: #00d4ff;
+            --accent-color: #ff2a6d;
+            --dark-bg: #05103a;
+            --card-bg: rgba(16, 24, 64, 0.8);
+            --text-color: #e0f2ff;
+            --success-color: #05ffa1;
+            --warning-color: #ffb627;
+            --danger-color: #ff427f;
+        }
+        
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #000000 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px, 90px 90px;
+            background-position: 0 0, 15px 15px;
+            z-index: -1;
+        }
+        
+        h1, h2, h3, h4, h5, h6, .cosmic-font {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+        }
+        
+        .cosmic-title {
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(110, 59, 255, 0.5);
+            font-weight: 700;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(110, 59, 255, 0.2);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            border-bottom: 1px solid rgba(110, 59, 255, 0.2);
+            padding: 1rem 1.5rem;
+        }
+        
+        .cosmic-card {
+            transition: all 0.4s ease;
+            position: relative;
+        }
+        
+        .cosmic-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(110, 59, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+            opacity: 0;
+        }
+        
+        .cosmic-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4), 0 0 15px rgba(110, 59, 255, 0.3);
+        }
+        
+        .cosmic-card:hover::after {
+            opacity: 1;
+        }
+        
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .btn::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(255,255,255,0.1), transparent);
+            z-index: -1;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover::after {
+            height: 50%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #4a17e6);
+            border: none;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #04c67d);
+            border: none;
+            color: #05103a;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-color), #d1365f);
+            border: none;
+        }
+        
+        .btn-outline-primary {
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            background: transparent;
+        }
+        
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-outline-danger {
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+            background: transparent;
+        }
+        
+        .btn-outline-danger:hover {
+            background: var(--danger-color);
+            color: white;
+        }
+        
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(110, 59, 255, 0.2);
+            border-radius: 8px;
+            color: var(--text-color);
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.25rem rgba(0, 212, 255, 0.25);
+            color: white;
+        }
+        
+        .form-label {
+            color: var(--secondary-color);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .api-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .api-status.connected {
+            background: rgba(5, 255, 161, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(5, 255, 161, 0.3);
+        }
+        
+        .api-status.disconnected {
+            background: rgba(255, 66, 127, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(255, 66, 127, 0.3);
+        }
+        
+        .api-status i {
+            margin-right: 0.5rem;
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .rotate-slow {
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .glow {
+            box-shadow: 0 0 15px rgba(110, 59, 255, 0.5);
+        }
+        
+        .cosmic-badge {
+            background: rgba(0, 212, 255, 0.15);
+            color: var(--secondary-color);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .cosmic-badge.price {
+            background: rgba(110, 59, 255, 0.15);
+            color: var(--primary-color);
+            border: 1px solid rgba(110, 59, 255, 0.3);
+        }
+        
+        .cosmic-badge.quantity {
+            background: rgba(255, 182, 39, 0.15);
+            color: var(--warning-color);
+            border: 1px solid rgba(255, 182, 39, 0.3);
+        }
+        
+        .alert {
+            background: var(--card-bg);
+            border: 1px solid rgba(110, 59, 255, 0.2);
+            border-radius: 12px;
+            color: var(--text-color);
+        }
+        
+        .alert-success {
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .alert-danger {
+            border-left: 4px solid var(--danger-color);
+        }
+        
+        /* Orbital decorations */
+        .orbital {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.5;
+            filter: blur(40px);
+            z-index: -1;
+        }
+        
+        .orbital-1 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(110, 59, 255, 0.4) 0%, rgba(110, 59, 255, 0) 70%);
+            top: -150px;
+            right: -150px;
+        }
+        
+        .orbital-2 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.3) 0%, rgba(0, 212, 255, 0) 70%);
+            bottom: -200px;
+            left: -200px;
+        }
+        
+        /* Loading animation */
+        .cosmic-loader {
+            display: inline-block;
+            position: relative;
+            width: 60px;
+            height: 60px;
+        }
+        
+        .cosmic-loader div {
+            position: absolute;
+            border: 4px solid var(--secondary-color);
+            opacity: 1;
+            border-radius: 50%;
+            animation: cosmic-loader 1.5s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+        }
+        
+        .cosmic-loader div:nth-child(2) {
+            animation-delay: -0.5s;
+        }
+        
+        @keyframes cosmic-loader {
+            0% {
+                top: 28px;
+                left: 28px;
+                width: 0;
+                height: 0;
+                opacity: 1;
+            }
+            100% {
+                top: -1px;
+                left: -1px;
+                width: 58px;
+                height: 58px;
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Orbital decorations -->
+    <div class="orbital orbital-1"></div>
+    <div class="orbital orbital-2"></div>
+    
+    <div class="container py-5">
+        <!-- Header Section -->
+        <div class="row mb-5 animate__animated animate__fadeIn">
+            <div class="col-md-12 text-center">
+                <div class="mb-4">
+                    <svg width="60" height="60" viewBox="0 0 24 24" class="floating mb-2">
+                        <circle cx="12" cy="12" r="10" fill="none" stroke="var(--secondary-color)" stroke-width="1"/>
+                        <circle cx="12" cy="12" r="6" fill="none" stroke="var(--primary-color)" stroke-width="1" class="rotate-slow"/>
+                        <circle cx="12" cy="12" r="2" fill="var(--accent-color)"/>
+                    </svg>
+                </div>
+                <h1 class="cosmic-title display-4 mb-3">COSMIC INVENTORY PORTAL</h1>
+                <div id="apiStatus" class="api-status d-inline-flex disconnected">
+                    <i class="bi bi-broadcast"></i> Establishing connection to central database...
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Form Card -->
+            <div class="col-lg-4 mb-4 animate__animated animate__fadeInLeft">
+                <div class="card cosmic-card glow">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0" id="formTitle">
+                            <i class="bi bi-plus-circle me-2"></i>
+                            <span class="cosmic-font">ADD NEW ITEM</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="itemForm">
+                            <input type="hidden" id="itemId">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">
+                                    <i class="bi bi-tag me-1"></i> Item Name
+                                </label>
+                                <input type="text" class="form-control" id="name" required placeholder="Enter item name">
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">
+                                    <i class="bi bi-file-text me-1"></i> Description
+                                </label>
+                                <textarea class="form-control" id="description" rows="3" placeholder="Enter item description"></textarea>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="price" class="form-label">
+                                        <i class="bi bi-currency-dollar me-1"></i> Price
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" id="price" step="0.01" min="0" required placeholder="0.00">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="quantity" class="form-label">
+                                        <i class="bi bi-boxes me-1"></i> Quantity
+                                    </label>
+                                    <input type="number" class="form-control" id="quantity" min="0" required placeholder="0">
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary" id="submitBtn">
+                                    <i class="bi bi-save me-2"></i> Add Item
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" id="resetBtn">
+                                    <i class="bi bi-arrow-counterclockwise me-2"></i> Reset Form
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Items List -->
+            <div class="col-lg-8 animate__animated animate__fadeInRight">
+                <div class="card cosmic-card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-grid-3x3-gap me-2"></i>
+                            <span class="cosmic-font">INVENTORY MANIFEST</span>
+                        </h5>
+                        <div class="cosmic-badge">
+                            <i class="bi bi-database-check me-1"></i> Real-time Sync
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="itemsList" class="row g-4">
+                            <div class="col-12 text-center py-5">
+                                <div class="cosmic-loader mb-3">
+                                    <div></div>
+                                    <div></div>
+                                </div>
+                                <p>Scanning inventory database...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Item Template -->
+    <template id="itemTemplate">
+        <div class="col-md-6 mb-3">
+            <div class="card cosmic-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="card-title item-name mb-0">Item Name</h5>
+                        <span class="cosmic-badge price">$<span class="item-price">0.00</span></span>
+                    </div>
+                    <p class="card-text item-description mb-3">Description goes here</p>
+                    <div class="d-flex justify-content-end">
+                        <span class="cosmic-badge quantity"><i class="bi bi-boxes me-1"></i> <span class="item-quantity">0</span> in stock</span>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent d-flex justify-content-between">
+                    <button class="btn btn-sm btn-outline-primary edit-btn">
+                        <i class="bi bi-pencil me-1"></i> Edit
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger delete-btn">
+                        <i class="bi bi-trash me-1"></i> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE_URL = 'http://localhost:5001/api';
+        let editMode = false;
+
+        // DOM Elements
+        const apiStatus = document.getElementById('apiStatus');
+        const itemForm = document.getElementById('itemForm');
+        const formTitle = document.getElementById('formTitle');
+        const submitBtn = document.getElementById('submitBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const itemsList = document.getElementById('itemsList');
+        const itemTemplate = document.getElementById('itemTemplate');
+        
+        // Sound effects
+        const playSound = (type) => {
+            // This function is just a placeholder for potential sound effects
+            // Would require actual audio files and user interaction to work properly
+            console.log(`Playing ${type} sound effect`);
+        };
+
+        // Check API connection
+        async function checkApiConnection() {
+            try {
+                apiStatus.innerHTML = '<i class="bi bi-arrow-repeat rotate-slow"></i> Establishing connection...';
+                
+                const response = await fetch(`${API_BASE_URL}/health`);
+                const data = await response.json();
+                
+                if (data.status === 'healthy') {
+                    apiStatus.innerHTML = '<i class="bi bi-check-circle-fill"></i> Central Database Connected';
+                    apiStatus.classList.remove('disconnected');
+                    apiStatus.classList.add('connected');
+                    playSound('success');
+                    return true;
+                } else {
+                    throw new Error('API not healthy');
+                }
+            } catch (error) {
+                apiStatus.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Connection Failed - Activate Flask Server';
+                apiStatus.classList.remove('connected');
+                apiStatus.classList.add('disconnected');
+                playSound('error');
+                return false;
+            }
+        }
+
+        // Fetch all items
+        async function fetchItems() {
+            try {
+                itemsList.innerHTML = `
+                    <div class="col-12 text-center py-5 animate__animated animate__pulse">
+                        <div class="cosmic-loader mb-3">
+                            <div></div>
+                            <div></div>
+                        </div>
+                        <p>Scanning inventory database...</p>
+                    </div>
+                `;
+                
+                const response = await fetch(`${API_BASE_URL}/items`);
+                const items = await response.json();
+                displayItems(items);
+            } catch (error) {
+                console.error('Error fetching items:', error);
+                itemsList.innerHTML = `
+                    <div class="col-12 text-center py-5 animate__animated animate__fadeIn">
+                        <i class="bi bi-database-x" style="font-size: 3rem; color: var(--danger-color);"></i>
+                        <p class="mt-3" style="color: var(--danger-color);">Data retrieval failed. Check API connection.</p>
+                    </div>
+                `;
+                playSound('error');
+            }
+        }
+
+        // Display items
+        function displayItems(items) {
+            itemsList.innerHTML = '';
+            
+            if (items.length === 0) {
+                itemsList.innerHTML = `
+                    <div class="col-12 text-center py-5 animate__animated animate__fadeIn">
+                        <i class="bi bi-inbox" style="font-size: 3rem; opacity: 0.5;"></i>
+                        <p class="mt-3">No items in inventory. Begin by adding your first item.</p>
+                        <button class="btn btn-outline-primary mt-3" onclick="document.getElementById('name').focus()">
+                            <i class="bi bi-plus-circle me-2"></i> Add First Item
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            // Add a slight delay between each item for a staggered animation effect
+            items.forEach((item, index) => {
+                setTimeout(() => {
+                    const itemNode = document.importNode(itemTemplate.content, true);
+                    const itemCard = itemNode.querySelector('.cosmic-card');
+                    
+                    // Add animation class
+                    itemCard.classList.add('animate__animated', 'animate__fadeInUp');
+                    
+                    // Set item data
+                    itemNode.querySelector('.item-name').textContent = item.name;
+                    itemNode.querySelector('.item-price').textContent = item.price.toFixed(2);
+                    itemNode.querySelector('.item-description').textContent = item.description || 'No description provided';
+                    itemNode.querySelector('.item-quantity').textContent = item.quantity;
+                    
+                    // Add low stock indicator
+                    const quantityBadge = itemNode.querySelector('.cosmic-badge.quantity');
+                    if (item.quantity <= 5 && item.quantity > 0) {
+                        quantityBadge.style.color = 'var(--warning-color)';
+                        quantityBadge.style.borderColor = 'rgba(255, 182, 39, 0.5)';
+                    } else if (item.quantity === 0) {
+                        quantityBadge.style.color = 'var(--danger-color)';
+                        quantityBadge.style.borderColor = 'rgba(255, 66, 127, 0.5)';
+                        quantityBadge.style.background = 'rgba(255, 66, 127, 0.15)';
+                    }
+                    
+                    // Set up event listeners
+                    const editBtn = itemNode.querySelector('.edit-btn');
+                    editBtn.dataset.id = item.id;
+                    editBtn.addEventListener('click', () => {
+                        editItem(item);
+                        playSound('click');
+                    });
+                    
+                    const deleteBtn = itemNode.querySelector('.delete-btn');
+                    deleteBtn.dataset.id = item.id;
+                    deleteBtn.addEventListener('click', () => {
+                        deleteItem(item.id);
+                        playSound('click');
+                    });
+                    
+                    itemsList.appendChild(itemNode);
+                }, index * 50); // 50ms delay between each item
+            });
+        }
+
+        // Create new item
+        async function createItem(itemData) {
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="bi bi-arrow-repeat rotate-slow me-2"></i> Processing...';
+                
+                const response = await fetch(`${API_BASE_URL}/items`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(itemData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to create item');
+                }
+                
+                const newItem = await response.json();
+                showAlert('<i class="bi bi-check-circle-fill me-2"></i> Item added to inventory!', 'success');
+                playSound('success');
+                resetForm();
+                fetchItems();
+                return newItem;
+            } catch (error) {
+                console.error('Error creating item:', error);
+                showAlert('<i class="bi bi-exclamation-triangle-fill me-2"></i> Failed to add item. Please try again.', 'danger');
+                playSound('error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-save me-2"></i> Add Item';
+            }
+        }
+
+        // Update existing item
+        async function updateItem(id, itemData) {
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="bi bi-arrow-repeat rotate-slow me-2"></i> Processing...';
+                
+                const response = await fetch(`${API_BASE_URL}/items/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(itemData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to update item');
+                }
+                
+                const updatedItem = await response.json();
+                showAlert('<i class="bi bi-check-circle-fill me-2"></i> Item updated successfully!', 'success');
+                playSound('success');
+                resetForm();
+                fetchItems();
+                return updatedItem;
+            } catch (error) {
+                console.error('Error updating item:', error);
+                showAlert('<i class="bi bi-exclamation-triangle-fill me-2"></i> Failed to update item. Please try again.', 'danger');
+                playSound('error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-save me-2"></i> Add Item';
+            }
+        }
+
+        // Delete item
+        async function deleteItem(id) {
+            // Create a custom confirmation dialog
+            const confirmDialog = document.createElement('div');
+            confirmDialog.className = 'position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center';
+            confirmDialog.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            confirmDialog.style.zIndex = '9999';
+            confirmDialog.innerHTML = `
+                <div class="card cosmic-card animate__animated animate__zoomIn" style="max-width: 400px;">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <span class="cosmic-font">CONFIRM DELETION</span>
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <p>Are you sure you want to remove this item from the inventory?</p>
+                        <p><small>This action cannot be undone.</small></p>
+                        <div class="d-flex justify-content-center gap-3 mt-4">
+                            <button class="btn btn-outline-secondary cancel-btn">
+                                <i class="bi bi-x-circle me-2"></i> Cancel
+                            </button>
+                            <button class="btn btn-danger confirm-btn">
+                                <i class="bi bi-trash me-2"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(confirmDialog);
+            playSound('alert');
+            
+            // Handle dialog buttons
+            return new Promise((resolve) => {
+                const cancelBtn = confirmDialog.querySelector('.cancel-btn');
+                const confirmBtn = confirmDialog.querySelector('.confirm-btn');
+                
+                cancelBtn.addEventListener('click', () => {
+                    confirmDialog.querySelector('.cosmic-card').classList.replace('animate__zoomIn', 'animate__zoomOut');
+                    setTimeout(() => {
+                        document.body.removeChild(confirmDialog);
+                        resolve(false);
+                    }, 300);
+                });
+                
+                confirmBtn.addEventListener('click', async () => {
+                    confirmBtn.disabled = true;
+                    confirmBtn.innerHTML = '<i class="bi bi-arrow-repeat rotate-slow me-2"></i> Deleting...';
+                    
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/items/${id}`, {
+                            method: 'DELETE'
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error('Failed to delete item');
+                        }
+                        
+                        confirmDialog.querySelector('.cosmic-card').classList.replace('animate__zoomIn', 'animate__zoomOut');
+                        setTimeout(() => {
+                            document.body.removeChild(confirmDialog);
+                            showAlert('<i class="bi bi-check-circle-fill me-2"></i> Item removed from inventory!', 'success');
+                            playSound('success');
+                            fetchItems();
+                            resolve(true);
+                        }, 300);
+                    } catch (error) {
+                        console.error('Error deleting item:', error);
+                        confirmDialog.querySelector('.cosmic-card').classList.replace('animate__zoomIn', 'animate__zoomOut');
+                        setTimeout(() => {
+                            document.body.removeChild(confirmDialog);
+                            showAlert('<i class="bi bi-exclamation-triangle-fill me-2"></i> Failed to delete item. Please try again.', 'danger');
+                            playSound('error');
+                            resolve(false);
+                        }, 300);
+                    }
+                });
+            });
+        }
+
+        // Edit item (populate form)
+        function editItem(item) {
+            // Scroll to form if needed
+            const formCard = document.querySelector('.cosmic-card.glow');
+            formCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Add highlight animation
+            formCard.classList.add('animate__animated', 'animate__pulse');
+            setTimeout(() => {
+                formCard.classList.remove('animate__animated', 'animate__pulse');
+            }, 1000);
+            
+            // Populate form
+            document.getElementById('itemId').value = item.id;
+            document.getElementById('name').value = item.name;
+            document.getElementById('description').value = item.description || '';
+            document.getElementById('price').value = item.price;
+            document.getElementById('quantity').value = item.quantity;
+            
+            // Update form title and button
+            formTitle.innerHTML = '<i class="bi bi-pencil-square me-2"></i><span class="cosmic-font">EDIT ITEM</span>';
+            submitBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i> Update Item';
+            editMode = true;
+        }
+
+        // Reset form
+        function resetForm() {
+            itemForm.reset();
+            document.getElementById('itemId').value = '';
+            formTitle.innerHTML = '<i class="bi bi-plus-circle me-2"></i><span class="cosmic-font">ADD NEW ITEM</span>';
+            submitBtn.innerHTML = '<i class="bi bi-save me-2"></i> Add Item';
+            editMode = false;
+        }
+
+        // Show alert
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show animate__animated animate__fadeInDown`;
+            alertDiv.role = 'alert';
+            alertDiv.style.position = 'fixed';
+            alertDiv.style.top = '20px';
+            alertDiv.style.right = '20px';
+            alertDiv.style.maxWidth = '400px';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            // Auto dismiss after 3 seconds
+            setTimeout(() => {
+                alertDiv.classList.remove('animate__fadeInDown');
+                alertDiv.classList.add('animate__fadeOutUp');
+                setTimeout(() => alertDiv.remove(), 500);
+            }, 3000);
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Add page transition effect
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 200);
+            
+            const isConnected = await checkApiConnection();
+            if (isConnected) {
+                fetchItems();
+            } else {
+                itemsList.innerHTML = `
+                    <div class="col-12 text-center py-5 animate__animated animate__fadeIn">
+                        <i class="bi bi-hdd-network" style="font-size: 3rem; color: var(--danger-color);"></i>
+                        <p class="mt-3" style="color: var(--danger-color);">Database connection offline. Please activate the Flask server.</p>
+                        <button class="btn btn-outline-primary mt-3" onclick="checkApiConnection().then(connected => { if(connected) fetchItems(); })">
+                            <i class="bi bi-arrow-repeat me-2"></i> Retry Connection
+                        </button>
+                    </div>
+                `;
+            }
+        });
+
+        itemForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Form validation with visual feedback
+            const form = e.target;
+            if (!form.checkValidity()) {
+                e.stopPropagation();
+                form.classList.add('was-validated');
+                playSound('error');
+                return;
+            }
+            
+            const itemData = {
+                name: document.getElementById('name').value,
+                description: document.getElementById('description').value,
+                price: parseFloat(document.getElementById('price').value),
+                quantity: parseInt(document.getElementById('quantity').value)
+            };
+            
+            if (editMode) {
+                const itemId = document.getElementById('itemId').value;
+                await updateItem(itemId, itemData);
+            } else {
+                await createItem(itemData);
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            resetForm();
+            playSound('click');
+        });
+        
+        // Add hover sound effect to buttons
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('mouseenter', () => playSound('hover'));
+        });
+    </script>
+</body>
+</html>
