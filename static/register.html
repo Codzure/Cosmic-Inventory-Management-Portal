@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Cosmic Inventory Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #6e3bff;
+            --secondary-color: #00d4ff;
+            --accent-color: #ff2a6d;
+            --dark-bg: #05103a;
+            --card-bg: rgba(16, 24, 64, 0.8);
+            --text-color: #e0f2ff;
+            --success-color: #05ffa1;
+            --warning-color: #ffb627;
+            --danger-color: #ff427f;
+        }
+        
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #000000 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px, 90px 90px;
+            background-position: 0 0, 15px 15px;
+            z-index: -1;
+        }
+        
+        h1, h2, h3, h4, h5, h6, .cosmic-font {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+        }
+        
+        .cosmic-title {
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(110, 59, 255, 0.5);
+            font-weight: 700;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(110, 59, 255, 0.2);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            border-bottom: 1px solid rgba(110, 59, 255, 0.2);
+            padding: 1.5rem;
+        }
+        
+        .cosmic-card {
+            transition: all 0.4s ease;
+            position: relative;
+        }
+        
+        .cosmic-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(110, 59, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+            opacity: 0;
+        }
+        
+        .cosmic-card:hover::after {
+            opacity: 1;
+        }
+        
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            padding: 0.75rem 1.5rem;
+        }
+        
+        .btn::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(255,255,255,0.1), transparent);
+            z-index: -1;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover::after {
+            height: 50%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #4a17e6);
+            border: none;
+        }
+        
+        .form-control {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(110, 59, 255, 0.2);
+            border-radius: 8px;
+            color: var(--text-color);
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.25rem rgba(0, 212, 255, 0.25);
+            color: white;
+        }
+        
+        .form-label {
+            color: var(--secondary-color);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .rotate-slow {
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .glow {
+            box-shadow: 0 0 15px rgba(110, 59, 255, 0.5);
+        }
+        
+        .alert {
+            background: var(--card-bg);
+            border: 1px solid rgba(110, 59, 255, 0.2);
+            border-radius: 12px;
+            color: var(--text-color);
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            max-width: 400px;
+            z-index: 9999;
+        }
+        
+        .alert-danger {
+            border-left: 4px solid var(--danger-color);
+        }
+        
+        .alert-success {
+            border-left: 4px solid var(--success-color);
+        }
+        
+        /* Orbital decorations */
+        .orbital {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.5;
+            filter: blur(40px);
+            z-index: -1;
+        }
+        
+        .orbital-1 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(110, 59, 255, 0.4) 0%, rgba(110, 59, 255, 0) 70%);
+            top: -150px;
+            right: -150px;
+        }
+        
+        .orbital-2 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.3) 0%, rgba(0, 212, 255, 0) 70%);
+            bottom: -200px;
+            left: -200px;
+        }
+        
+        .register-container {
+            max-width: 500px;
+            width: 100%;
+            padding: 2rem;
+        }
+        
+        .form-floating > label {
+            color: rgba(224, 242, 255, 0.6);
+        }
+        
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label {
+            color: var(--secondary-color);
+            opacity: 0.8;
+        }
+        
+        .input-group-text {
+            background: rgba(110, 59, 255, 0.2);
+            border: 1px solid rgba(110, 59, 255, 0.2);
+            color: var(--secondary-color);
+        }
+        
+        .toggle-password {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .toggle-password:hover {
+            color: var(--accent-color);
+        }
+        
+        .cosmic-badge {
+            background: rgba(0, 212, 255, 0.15);
+            color: var(--secondary-color);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .password-strength {
+            height: 5px;
+            border-radius: 5px;
+            margin-top: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .password-feedback {
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+        
+        .cosmic-link {
+            color: var(--secondary-color);
+            transition: all 0.3s ease;
+        }
+        
+        .cosmic-link:hover {
+            color: var(--accent-color);
+            text-shadow: 0 0 5px rgba(255, 42, 109, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Orbital decorations -->
+    <div class="orbital orbital-1"></div>
+    <div class="orbital orbital-2"></div>
+    
+    <div class="register-container">
+        <div class="text-center mb-4">
+            <div class="mb-4">
+                <svg width="60" height="60" viewBox="0 0 24 24" class="floating mb-2">
+                    <circle cx="12" cy="12" r="10" fill="none" stroke="var(--secondary-color)" stroke-width="1"/>
+                    <circle cx="12" cy="12" r="6" fill="none" stroke="var(--primary-color)" stroke-width="1" class="rotate-slow"/>
+                    <circle cx="12" cy="12" r="2" fill="var(--accent-color)"/>
+                </svg>
+            </div>
+            <h1 class="cosmic-title display-5 mb-3">COSMIC INVENTORY</h1>
+            <div class="cosmic-badge mb-4">
+                <i class="bi bi-person-plus me-1"></i> New User Registration
+            </div>
+        </div>
+        
+        <div class="card cosmic-card glow animate__animated animate__fadeIn">
+            <div class="card-header text-center">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-person-badge me-2"></i>
+                    <span class="cosmic-font">CREATE ACCOUNT</span>
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form id="registerForm">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">
+                            <i class="bi bi-person me-1"></i> Username
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                            <input type="text" class="form-control" id="username" required placeholder="Choose a username">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">
+                            <i class="bi bi-envelope me-1"></i> Email
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-at"></i></span>
+                            <input type="email" class="form-control" id="email" required placeholder="Enter your email">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            <i class="bi bi-lock me-1"></i> Password
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
+                            <input type="password" class="form-control" id="password" required placeholder="Create a password" oninput="checkPasswordStrength()">
+                            <span class="input-group-text toggle-password" onclick="togglePasswordVisibility('password', 'toggleIcon')">
+                                <i class="bi bi-eye" id="toggleIcon"></i>
+                            </span>
+                        </div>
+                        <div class="password-strength" id="passwordStrength"></div>
+                        <div class="password-feedback" id="passwordFeedback"></div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="confirmPassword" class="form-label">
+                            <i class="bi bi-lock-check me-1"></i> Confirm Password
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-shield-check"></i></span>
+                            <input type="password" class="form-control" id="confirmPassword" required placeholder="Confirm your password" oninput="checkPasswordMatch()">
+                            <span class="input-group-text toggle-password" onclick="togglePasswordVisibility('confirmPassword', 'toggleIconConfirm')">
+                                <i class="bi bi-eye" id="toggleIconConfirm"></i>
+                            </span>
+                        </div>
+                        <div class="password-feedback" id="passwordMatchFeedback"></div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary" id="registerBtn">
+                            <i class="bi bi-person-plus me-2"></i> Create Account
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-4">
+                    <p>Already have an account?</p>
+                    <a href="http://localhost:5001/login" class="btn btn-outline-primary mt-2" id="loginLink">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Login to Your Account
+                    </a>
+                    <script>
+                        // Ensure the login link works properly
+                        document.getElementById('loginLink').addEventListener('click', function(e) {
+                            e.preventDefault();
+                            window.location.href = 'http://localhost:5001/login';
+                        });
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Toggle password visibility
+        function togglePasswordVisibility(inputId, iconId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.getElementById(iconId);
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.replace('bi-eye-slash', 'bi-eye');
+            }
+        }
+        
+        // Check password strength
+        function checkPasswordStrength() {
+            const password = document.getElementById('password').value;
+            const strengthBar = document.getElementById('passwordStrength');
+            const feedback = document.getElementById('passwordFeedback');
+            
+            // Reset
+            strengthBar.style.width = '0%';
+            strengthBar.style.backgroundColor = '';
+            feedback.textContent = '';
+            feedback.style.color = '';
+            
+            if (password.length === 0) {
+                return;
+            }
+            
+            // Calculate strength
+            let strength = 0;
+            const patterns = [
+                /[a-z]/, // lowercase
+                /[A-Z]/, // uppercase
+                /[0-9]/, // numbers
+                /[^a-zA-Z0-9]/ // special characters
+            ];
+            
+            // Add points for length
+            if (password.length >= 8) strength += 1;
+            if (password.length >= 12) strength += 1;
+            
+            // Add points for complexity
+            patterns.forEach(pattern => {
+                if (pattern.test(password)) strength += 1;
+            });
+            
+            // Calculate percentage and set colors
+            const percentage = (strength / 6) * 100;
+            strengthBar.style.width = `${percentage}%`;
+            
+            if (percentage < 33) {
+                strengthBar.style.backgroundColor = 'var(--danger-color)';
+                feedback.textContent = 'Weak password';
+                feedback.style.color = 'var(--danger-color)';
+            } else if (percentage < 66) {
+                strengthBar.style.backgroundColor = 'var(--warning-color)';
+                feedback.textContent = 'Moderate password';
+                feedback.style.color = 'var(--warning-color)';
+            } else {
+                strengthBar.style.backgroundColor = 'var(--success-color)';
+                feedback.textContent = 'Strong password';
+                feedback.style.color = 'var(--success-color)';
+            }
+        }
+        
+        // Check if passwords match
+        function checkPasswordMatch() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const feedback = document.getElementById('passwordMatchFeedback');
+            
+            if (confirmPassword.length === 0) {
+                feedback.textContent = '';
+                return;
+            }
+            
+            if (password === confirmPassword) {
+                feedback.textContent = 'Passwords match';
+                feedback.style.color = 'var(--success-color)';
+            } else {
+                feedback.textContent = 'Passwords do not match';
+                feedback.style.color = 'var(--danger-color)';
+            }
+        }
+        
+        // Show alert
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show animate__animated animate__fadeInDown`;
+            alertDiv.role = 'alert';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            // Auto dismiss after 3 seconds
+            setTimeout(() => {
+                alertDiv.classList.remove('animate__fadeInDown');
+                alertDiv.classList.add('animate__fadeOutUp');
+                setTimeout(() => alertDiv.remove(), 500);
+            }, 3000);
+        }
+        
+        // Play sound effect (placeholder)
+        function playSound(type) {
+            console.log(`Playing ${type} sound effect`);
+        }
+        
+        // Handle form submission
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                showAlert('<i class="bi bi-exclamation-triangle-fill me-2"></i> Passwords do not match', 'danger');
+                playSound('error');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('registerBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-arrow-repeat rotate-slow me-2"></i> Creating Account...';
+            
+            const userData = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                password: password
+            };
+            
+            try {
+                const response = await fetch('http://localhost:5001/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(userData)
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Registration failed');
+                }
+                
+                // Success - redirect to dashboard
+                showAlert('<i class="bi bi-check-circle-fill me-2"></i> Account created successfully! Redirecting...', 'success');
+                playSound('success');
+                
+                setTimeout(() => {
+                    window.location.href = 'http://localhost:5001/';
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Registration error:', error);
+                showAlert(`<i class="bi bi-exclamation-triangle-fill me-2"></i> Registration failed. Please try again.`, 'danger');
+                playSound('error');
+                
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-person-plus me-2"></i> Create Account';
+            }
+        });
+        
+        // Direct link to main page for demo purposes
+        document.querySelector('.cosmic-title').addEventListener('click', () => {
+            window.location.href = '/';
+        });
+        
+        // Add page transition effect
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 200);
+            
+            // Focus on username field
+            setTimeout(() => {
+                document.getElementById('username').focus();
+            }, 500);
+        });
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -21,6 +21,10 @@
             --danger-color: #ff427f;
         }
         
+        .user-icon {
+            font-size: 1.5rem;
+        }
+        
         body {
             font-family: 'Exo 2', sans-serif;
             background: linear-gradient(135deg, var(--dark-bg) 0%, #000000 100%);
@@ -214,6 +218,15 @@
             margin-right: 0.5rem;
         }
         
+        .database-error-icon {
+            font-size: 3rem;
+            color: var(--danger-color);
+        }
+        
+        .text-danger {
+            color: var(--danger-color) !important;
+        }
+        
         .floating {
             animation: floating 3s ease-in-out infinite;
         }
@@ -344,7 +357,7 @@
     
     <div class="container py-5">
         <!-- Header Section -->
-        <div class="row mb-5 animate__animated animate__fadeIn">
+        <div class="row mb-4 animate__animated animate__fadeIn">
             <div class="col-md-12 text-center">
                 <div class="mb-4">
                     <svg width="60" height="60" viewBox="0 0 24 24" class="floating mb-2">
@@ -356,6 +369,28 @@
                 <h1 class="cosmic-title display-4 mb-3">COSMIC INVENTORY PORTAL</h1>
                 <div id="apiStatus" class="api-status d-inline-flex disconnected">
                     <i class="bi bi-broadcast"></i> Establishing connection to central database...
+                </div>
+            </div>
+        </div>
+        
+        <!-- User Info Bar -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card cosmic-card">
+                    <div class="card-body py-2 px-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-person-circle me-2 user-icon"></i>
+                                <div>
+                                    <div class="small text-muted">Welcome,</div>
+                                    <div class="fw-bold" id="usernameDisplay">Commander</div>
+                                </div>
+                            </div>
+                            <button id="logoutBtn" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-box-arrow-right me-1"></i> Logout
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -473,6 +508,7 @@
     <script>
         const API_BASE_URL = 'http://localhost:5001/api';
         let editMode = false;
+        let currentUser = null;
 
         // DOM Elements
         const apiStatus = document.getElementById('apiStatus');
@@ -482,6 +518,8 @@
         const resetBtn = document.getElementById('resetBtn');
         const itemsList = document.getElementById('itemsList');
         const itemTemplate = document.getElementById('itemTemplate');
+        const usernameDisplay = document.getElementById('usernameDisplay');
+        const logoutBtn = document.getElementById('logoutBtn');
         
         // Sound effects
         const playSound = (type) => {
@@ -489,6 +527,64 @@
             // Would require actual audio files and user interaction to work properly
             console.log(`Playing ${type} sound effect`);
         };
+        
+        // Check if user is authenticated
+        async function checkAuthentication() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/user`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    // If not authenticated, redirect to login
+                    window.location.href = 'http://localhost:5001/login';
+                    return null;
+                }
+                
+                const user = await response.json();
+                currentUser = user;
+                
+                // Update UI with username
+                if (usernameDisplay) {
+                    usernameDisplay.textContent = user.username;
+                }
+                
+                return user;
+            } catch (error) {
+                console.error('Authentication error:', error);
+                window.location.href = 'http://localhost:5001/login';
+                return null;
+            }
+        }
+        
+        // Logout function
+        async function logout() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    showAlert('<i class="bi bi-check-circle-fill me-2"></i> Logged out successfully', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'http://localhost:5001/login';
+                    }, 1000);
+                } else {
+                    throw new Error('Logout failed');
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                showAlert('<i class="bi bi-exclamation-triangle-fill me-2"></i> Logout failed', 'danger');
+            }
+        }
 
         // Check API connection
         async function checkApiConnection() {
@@ -541,7 +637,18 @@
                     </div>
                 `;
                 
-                const response = await fetch(`${API_BASE_URL}/items`);
+                const response = await fetch(`${API_BASE_URL}/items`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch items');
+                }
+                
                 const items = await response.json();
                 displayItems(items);
             } catch (error) {
@@ -549,7 +656,7 @@
                 itemsList.innerHTML = `
                     <div class="col-12 text-center py-5 animate__animated animate__fadeIn">
                         <i class="bi bi-database-x" style="font-size: 3rem; color: var(--danger-color);"></i>
-                        <p class="mt-3" style="color: var(--danger-color);">Data retrieval failed. Check API connection.</p>
+                        <p class="mt-3" style="color: var(--danger-color);">Data retrieval failed. Please try again.</p>
                     </div>
                 `;
                 playSound('error');
@@ -625,17 +732,12 @@
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i class="bi bi-arrow-repeat rotate-slow me-2"></i> Processing...';
                 
-                // Check if API is connected first
-                const isConnected = await checkApiConnection();
-                if (!isConnected) {
-                    throw new Error('API not connected');
-                }
-                
                 const response = await fetch(`${API_BASE_URL}/items`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify(itemData)
                 });
                 
@@ -644,9 +746,13 @@
                 }
                 
                 const newItem = await response.json();
+                
+                // Show success message
                 showAlert('<i class="bi bi-check-circle-fill me-2"></i> Item added to inventory!', 'success');
                 playSound('success');
                 resetForm();
+                
+                // Update the items list
                 fetchItems();
                 
                 // Focus back on the name field for quick entry of another item
@@ -657,11 +763,7 @@
                 return newItem;
             } catch (error) {
                 console.error('Error creating item:', error);
-                if (error.message === 'API not connected') {
-                    showAlert('<i class="bi bi-exclamation-triangle-fill me-2"></i> Cannot add item: Database offline. Please activate the Flask server.', 'danger');
-                } else {
-                    showAlert('<i class="bi bi-exclamation-triangle-fill me-2"></i> Failed to add item. Please try again.', 'danger');
-                }
+                showAlert('<i class="bi bi-exclamation-triangle-fill me-2"></i> Failed to add item. Please try again.', 'danger');
                 playSound('error');
             } finally {
                 submitBtn.disabled = false;
@@ -680,6 +782,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify(itemData)
                 });
                 
@@ -688,10 +791,14 @@
                 }
                 
                 const updatedItem = await response.json();
+                
                 showAlert('<i class="bi bi-check-circle-fill me-2"></i> Item updated successfully!', 'success');
                 playSound('success');
                 resetForm();
+                
+                // Update the items list
                 fetchItems();
+                
                 return updatedItem;
             } catch (error) {
                 console.error('Error updating item:', error);
@@ -714,21 +821,21 @@
                 <div class="card cosmic-card animate__animated animate__zoomIn" style="max-width: 400px;">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="bi bi-exclamation-triangle me-2"></i>
-                            <span class="cosmic-font">CONFIRM DELETION</span>
+                            <i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>
+                            Confirm Deletion
                         </h5>
                     </div>
-                    <div class="card-body text-center">
-                        <p>Are you sure you want to remove this item from the inventory?</p>
-                        <p><small>This action cannot be undone.</small></p>
-                        <div class="d-flex justify-content-center gap-3 mt-4">
-                            <button class="btn btn-outline-secondary cancel-btn">
-                                <i class="bi bi-x-circle me-2"></i> Cancel
-                            </button>
-                            <button class="btn btn-danger confirm-btn">
-                                <i class="bi bi-trash me-2"></i> Delete
-                            </button>
-                        </div>
+                    <div class="card-body">
+                        <p>Are you sure you want to remove this item from inventory?</p>
+                        <p class="small text-muted">This action cannot be undone.</p>
+                    </div>
+                    <div class="card-footer d-flex justify-content-end gap-2">
+                        <button class="btn btn-outline-secondary cancel-btn">
+                            <i class="bi bi-x-circle me-2"></i> Cancel
+                        </button>
+                        <button class="btn btn-danger confirm-btn">
+                            <i class="bi bi-trash me-2"></i> Delete
+                        </button>
                     </div>
                 </div>
             `;
@@ -737,7 +844,7 @@
             playSound('alert');
             
             // Handle dialog buttons
-            return new Promise((resolve) => {
+            return new Promise(async (resolve) => {
                 const cancelBtn = confirmDialog.querySelector('.cancel-btn');
                 const confirmBtn = confirmDialog.querySelector('.confirm-btn');
                 
@@ -750,24 +857,31 @@
                 });
                 
                 confirmBtn.addEventListener('click', async () => {
-                    confirmBtn.disabled = true;
-                    confirmBtn.innerHTML = '<i class="bi bi-arrow-repeat rotate-slow me-2"></i> Deleting...';
-                    
                     try {
+                        confirmBtn.disabled = true;
+                        confirmBtn.innerHTML = '<i class="bi bi-arrow-repeat rotate-slow me-2"></i> Deleting...';
+                        
                         const response = await fetch(`${API_BASE_URL}/items/${id}`, {
-                            method: 'DELETE'
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            credentials: 'include'
                         });
                         
                         if (!response.ok) {
                             throw new Error('Failed to delete item');
                         }
                         
+                        // Add a small delay to simulate processing
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                        
                         confirmDialog.querySelector('.cosmic-card').classList.replace('animate__zoomIn', 'animate__zoomOut');
                         setTimeout(() => {
                             document.body.removeChild(confirmDialog);
-                            showAlert('<i class="bi bi-check-circle-fill me-2"></i> Item removed from inventory!', 'success');
+                            showAlert('<i class="bi bi-check-circle-fill me-2"></i> Item deleted successfully!', 'success');
                             playSound('success');
-                            fetchItems();
+                            displayItems(items);
                             resolve(true);
                         }, 300);
                     } catch (error) {
@@ -852,6 +966,10 @@
                 document.body.style.opacity = '1';
             }, 200);
             
+            // Check if user is authenticated
+            const user = checkAuthentication();
+            if (!user) return; // If not authenticated, redirected to login page
+            
             // Focus on the name field to make it immediately interactive
             setTimeout(() => {
                 document.getElementById('name').focus();
@@ -864,8 +982,8 @@
             } else {
                 itemsList.innerHTML = `
                     <div class="col-12 text-center py-5 animate__animated animate__fadeIn">
-                        <i class="bi bi-hdd-network" style="font-size: 3rem; color: var(--danger-color);"></i>
-                        <p class="mt-3" style="color: var(--danger-color);">Database connection offline. Please activate the Flask server.</p>
+                        <i class="bi bi-hdd-network database-error-icon"></i>
+                        <p class="mt-3 text-danger">Database connection offline. Please activate the Flask server.</p>
                         <button class="btn btn-outline-primary mt-3" onclick="checkApiConnection().then(connected => { if(connected) fetchItems(); })">
                             <i class="bi bi-arrow-repeat me-2"></i> Retry Connection
                         </button>
@@ -877,6 +995,12 @@
                     el.disabled = false;
                 });
             }
+            
+            // Set up logout button
+            logoutBtn.addEventListener('click', () => {
+                playSound('click');
+                logout();
+            });
         });
 
         itemForm.addEventListener('submit', async (e) => {

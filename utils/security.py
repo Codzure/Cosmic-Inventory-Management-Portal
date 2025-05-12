@@ -2,6 +2,8 @@ import os
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv, set_key
 import base64
+import hashlib
+import secrets
 
 def generate_key():
     """Generate a key and save it to a file"""
@@ -84,6 +86,30 @@ def get_db_password():
     
     # If the password is not encrypted
     return password
+
+def hash_password(password):
+    """Hash a password for storing"""
+    # Generate a random salt
+    salt = secrets.token_hex(16)
+    # Hash the password with the salt
+    pwdhash = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), 
+                                 salt.encode('utf-8'), 100000)
+    # Return the salt and hash together
+    return salt + ':' + base64.b64encode(pwdhash).decode('utf-8')
+
+def check_password(provided_password, stored_password):
+    """Verify a stored password against one provided by user"""
+    try:
+        # Split the stored password into salt and hash
+        salt, stored_hash = stored_password.split(':')
+        # Hash the provided password with the same salt
+        pwdhash = hashlib.pbkdf2_hmac('sha256', provided_password.encode('utf-8'), 
+                                     salt.encode('utf-8'), 100000)
+        # Compare the hashes
+        return base64.b64encode(pwdhash).decode('utf-8') == stored_hash
+    except Exception as e:
+        print(f"Error checking password: {e}")
+        return False
 
 if __name__ == "__main__":
     # If run directly, encrypt the password in the .env file
